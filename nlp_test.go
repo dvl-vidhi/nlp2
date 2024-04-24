@@ -1,11 +1,12 @@
 package nlp
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/stretchr/testify/require"
+	// "github.com/stretchr/testify/require"
 )
 
 /*
@@ -35,7 +36,10 @@ func loadTokenizeCases(t *testing.T) []tokenizeCase {
 
 	// err = toml.Unmarshal(data, &testCases)
 	_, err := toml.DecodeFile("testdata/tokenize_cases.toml", &testCases)
-	require.NoError(t, err, "Unmarshal TOML")
+	// require.NoError(t, err, "Unmarshal TOML")
+	if err != nil {
+		t.Fatalf("Unmarshal TOML: %v", err)
+	}
 	return testCases.Cases
 }
 
@@ -47,7 +51,11 @@ func TestTokenizeTable(t *testing.T) {
 	for _, tc := range loadTokenizeCases(t) {
 		t.Run(tc.Text, func(t *testing.T) {
 			tokens := Tokenize(tc.Text)
-			require.Equal(t, tc.Tokens, tokens)
+			// require.Equal(t, tc.Tokens, tokens)
+			want := tc.Tokens
+			if !reflect.DeepEqual(tokens, want) {
+				t.Errorf("got %#v, want %#v", tokens, want)
+			}
 		})
 	}
 }
@@ -56,7 +64,10 @@ func TestTokenize(t *testing.T) {
 	text := "What's on second?"
 	expected := []string{"what", "on", "second"}
 	tokens := Tokenize(text)
-	require.Equal(t, expected, tokens)
+	if !reflect.DeepEqual(tokens, expected) {
+		t.Errorf("got %#v, want %#v", tokens, expected)
+	}
+	// require.Equal(t, expected, tokens)
 	/* Before testify
 	// if tokens != expected { // Can't compare slices with == in Go (only to nil)
 	if !reflect.DeepEqual(expected, tokens) {

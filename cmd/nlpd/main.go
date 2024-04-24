@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
+	// "github.com/gorilla/mux"
 
-	"github.com/gicao/nlp"
-	"github.com/gicao/nlp/stemmer"
+	nlp "github.com/dvl-vidhi/nlp2"
+	"github.com/dvl-vidhi/nlp2/stemmer"
 )
 
 var (
@@ -33,11 +33,16 @@ func main() {
 		http.HandleFunc("/health", healthHandler)
 		http.HandleFunc("/tokenize", tokenizeHandler)
 	*/
-	r := mux.NewRouter()
-	r.HandleFunc("/health", s.healthHandler).Methods(http.MethodGet)
-	r.HandleFunc("/tokenize", s.tokenizeHandler).Methods(http.MethodPost)
-	r.HandleFunc("/stem/{word}", s.stemHandler).Methods(http.MethodGet)
+	r := http.NewServeMux()
+	r.HandleFunc("GET /health", s.healthHandler)
+	r.HandleFunc("POST /tokenize", s.tokenizeHandler)
+	http.HandleFunc("GET /stem/{word}", s.stemHandler)
 	http.Handle("/", r)
+	// r := mux.NewRouter()
+	// r.HandleFunc("/health", s.healthHandler).Methods(http.MethodGet)
+	// r.HandleFunc("/tokenize", s.tokenizeHandler).Methods(http.MethodPost)
+	// r.HandleFunc("/stem/{word}", s.stemHandler).Methods(http.MethodGet)
+	// http.Handle("/", r)
 
 	// run server
 	addr := os.Getenv("NLPD_ADDR")
@@ -55,8 +60,13 @@ type Server struct {
 }
 
 func (s *Server) stemHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	word := vars["word"]
+	// word := r.URL.Path[len("/stem/"):]
+	// if word == "" {
+
+	// }
+	word := r.PathValue("word")
+	// vars := mux.Vars(r)
+	// word := vars["word"]
 	stem := stemmer.Stem(word)
 	fmt.Fprintln(w, stem)
 }
